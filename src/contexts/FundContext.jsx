@@ -20,11 +20,41 @@ export const FundProvider = ({ children }) => {
   const [accountInfoData, setAccountInfoData] = useState([]);
   const [accountInfo, setAccountInfo] = useState({});
   const [transactionsData, setTransactionsData] = useState([]);
+  const [fundGroups, setFundGroups] = useState([]);
+  const [AllFundsData, setAllFundsData] = useState([]);
+  const [funds, setFunds] = useState([]);
+  const [selectedFundGroup, setSelectedFundGroup] = useState("");
 
   const fetchAccountData = async () => {
     const response = await fetch("/suncrestFiles/xx_account_info.json");
     const data = await response.json();
     setAccount(data);
+  };
+
+  const fetchAllFundsData = async () => {
+    const response = await fetch("/suncrestFiles/xx_fund_level.json");
+    const data = await response.json();
+    setAllFundsData(data);
+  };
+
+  // Transacitionsd Table
+  const handleSelectedFundGroup = async (e) => {
+    setSelectedFundGroup(e.target.value);
+  };
+
+  const fetchFundGroupData = async () => {
+    const response = await fetch("/suncrestFiles/xx_fund_level.json");
+    const data = await response.json();
+    const uniqueFundGroups = Array.from(
+      new Set(data.map((fund) => fund.Fund_group_id))
+    ).map((id) => {
+      return {
+        id: id,
+        name: data.find((fund) => fund.Fund_group_id === id).Fund_group_name,
+      };
+    });
+
+    setFundGroups(uniqueFundGroups);
   };
 
   async function fetchAllData() {
@@ -91,6 +121,10 @@ export const FundProvider = ({ children }) => {
     } catch (error) {
       console.error("Error fetching transaction data:", error);
     }
+  };
+
+  const handleSettingFunds = (data) => {
+    setFunds(data);
   };
 
   const handleSelectedAccount = (value, type) => {
@@ -281,6 +315,14 @@ export const FundProvider = ({ children }) => {
         suggestions,
         searchTerm,
         handleSuggestions,
+        fetchFundGroupData,
+        fundGroups,
+        selectedFundGroup,
+        fetchAllFundsData,
+        handleSettingFunds,
+        handleSelectedFundGroup,
+        AllFundsData,
+        funds,
       }}
     >
       {children}

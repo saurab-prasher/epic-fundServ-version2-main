@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { FundContext } from "../../contexts/FundContext";
 
 const TransactionFilters = ({
   fromDate,
@@ -8,11 +9,32 @@ const TransactionFilters = ({
   formatYYYYMMDD,
   handleDateChange,
 }) => {
-  const [fundGroup, setFundGroup] = useState("");
-  const [selectedFund, setSelectedFund] = useState("");
   // You can replace these sample options with actual data from your application
-  const fundGroups = ["All Groups", "Group 1", "Group 2"];
-  const funds = ["All Funds", "Fund A", "Fund B"];
+
+  const {
+    fundGroups,
+    handleSelectedFundGroup,
+    selectedFundGroup,
+    AllFundsData,
+    handleSettingFunds,
+    funds,
+  } = useContext(FundContext);
+
+  useEffect(() => {
+    if (selectedFundGroup) {
+      const relatedFunds = AllFundsData.filter(
+        (fund) => fund.Fund_group_id === selectedFundGroup
+      ).map((fund) => {
+        return {
+          id: fund.Fund_id,
+          name: fund.Fund_name,
+        };
+      });
+      handleSettingFunds(relatedFunds);
+    } else {
+      handleSettingFunds([]);
+    }
+  }, [selectedFundGroup]);
 
   return (
     <div className='TransactionFilters '>
@@ -48,20 +70,20 @@ const TransactionFilters = ({
             </div>
           </div>
         </div>
-        <div className='flex flex-col w-80 gap-4 '>
+        <div className='flex flex-col w-[30rem] gap-4 '>
           <div className='flex  gap-4 justify-between items-center'>
-            <label htmlFor='fund-group' className=' block w-full text-gray-700'>
+            <label htmlFor='fund-group' className=' block w-60 text-gray-700'>
               Select Fund Group:
             </label>
             <select
               id='fund-group'
-              value={fundGroup}
-              onChange={(e) => setFundGroup(e.target.value)}
-              className='block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
+              value={selectedFundGroup}
+              onChange={(e) => handleSelectedFundGroup(e)}
+              className='block w-fit px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
             >
               {fundGroups.map((group) => (
-                <option key={group} value={group}>
-                  {group}
+                <option key={group.id} value={group.name}>
+                  {group.name}
                 </option>
               ))}
             </select>
@@ -74,6 +96,17 @@ const TransactionFilters = ({
               Select Fund:
             </label>
             <select
+              className='block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
+              disabled={!selectedFundGroup}
+            >
+              <option value=''>Select Fund</option>
+              {funds.map((fund) => (
+                <option key={fund.id} value={fund.id}>
+                  {fund.name}
+                </option>
+              ))}
+            </select>
+            {/* <select
               id='select-fund'
               value={selectedFund}
               onChange={(e) => setSelectedFund(e.target.value)}
@@ -84,7 +117,7 @@ const TransactionFilters = ({
                   {fund}
                 </option>
               ))}
-            </select>
+            </select> */}
           </div>
         </div>
       </div>

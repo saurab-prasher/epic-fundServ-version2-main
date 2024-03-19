@@ -3,8 +3,18 @@ import { FundContext } from "../../contexts/FundContext";
 import * as XLSX from "xlsx";
 import TransactionFilters from "./TransactionFilters";
 const TransactionsTable = () => {
-  const { allTransactionsData, fetchAllTransactionsData } =
-    useContext(FundContext);
+  const {
+    allTransactionsData,
+    fetchAllTransactionsData,
+    fetchFundGroupData,
+
+    fetchAllFundsData,
+  } = useContext(FundContext);
+
+  useEffect(() => {
+    fetchAllFundsData();
+    fetchFundGroupData();
+  }, []);
 
   useEffect(() => {
     fetchAllTransactionsData();
@@ -13,7 +23,6 @@ const TransactionsTable = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
-  // Function to format date from YYYYMMDD to YYYY-MM-DD for comparison
   const formatYYYYMMDD = (dateStr) => {
     return `${dateStr.substring(0, 4)}-${dateStr.substring(
       4,
@@ -22,13 +31,17 @@ const TransactionsTable = () => {
   };
   const handleDateChange = (event) => {
     setToDate(event.target.value);
-    // Additional actions can be performed here, like form validation
   };
 
   const filteredTransactions = allTransactionsData.filter((transaction) => {
     const tradeDateFormatted = formatYYYYMMDD(transaction.Trade_date);
-    const settlementDateFormatted = formatYYYYMMDD(transaction.Settlement_date);
-    return tradeDateFormatted >= fromDate && settlementDateFormatted <= toDate;
+    const settlementDateFormatted = formatYYYYMMDD(transaction.Trade_date);
+
+    // Check if fromDate and toDate are set, otherwise bypass the filter for that end
+    const afterFromDate = fromDate ? tradeDateFormatted >= fromDate : true;
+    const beforeToDate = toDate ? settlementDateFormatted <= toDate : true;
+
+    return afterFromDate && beforeToDate;
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -72,7 +85,7 @@ const TransactionsTable = () => {
     const workbook = XLSX.utils.book_new(); // Create a new workbook
     const worksheet = XLSX.utils.json_to_sheet(currentData); // Convert
     XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions"); //
-    XLSX.writeFile(workbook, "Transactions.xlsx"); // Trigger the file download
+    XLSX.writeFile(workbook, "Transactions.xlsx");
   };
 
   return (
@@ -217,7 +230,7 @@ const TransactionsTable = () => {
               id='rows-per-page'
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
-              className='w-16 mt-1 block w-fit border py-1 px-1 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md'
+              className=' mt-1 block w-fit border py-1 px-1 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md'
             >
               <option value='5'>5</option>
               <option value='10'>10</option>
@@ -229,7 +242,10 @@ const TransactionsTable = () => {
           <div className='justify-self-start px-6 mr-auto'>
             <p className='text-xs font-normal text-gray-600 mr-auto'>
               Total:
-              <span className='font-semibold'> {currentData?.length} </span>
+              <span className='font-semibold'>
+                {" "}
+                {filteredTransactions?.length}{" "}
+              </span>
               transactions.
             </p>
           </div>
