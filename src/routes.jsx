@@ -6,6 +6,7 @@ import {
 } from "./components/pages";
 
 import App from "./App";
+import NavPage from "./components/pages/NavPage";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -23,6 +24,10 @@ export const router = createBrowserRouter([
       {
         path: "transactions",
         element: <TransactionsPage />,
+      },
+      {
+        path: "nav",
+        element: <NavPage />,
       },
     ],
   },

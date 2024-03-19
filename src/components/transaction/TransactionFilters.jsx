@@ -1,40 +1,39 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { FundContext } from "../../contexts/FundContext";
 
 const TransactionFilters = ({
   fromDate,
   toDate,
-  setToDate,
   setFromDate,
-  formatYYYYMMDD,
   handleDateChange,
 }) => {
-  // You can replace these sample options with actual data from your application
-
   const {
     fundGroups,
     handleSelectedFundGroup,
-    selectedFundGroup,
+    selectedFundGroupID,
     AllFundsData,
     handleSettingFunds,
     funds,
+    handleSelectedFundId,
+    selectedFundID,
   } = useContext(FundContext);
 
   useEffect(() => {
-    if (selectedFundGroup) {
+    if (selectedFundGroupID) {
       const relatedFunds = AllFundsData.filter(
-        (fund) => fund.Fund_group_id === selectedFundGroup
+        (fund) => fund.Fund_group_id === selectedFundGroupID
       ).map((fund) => {
         return {
           id: fund.Fund_id,
           name: fund.Fund_name,
         };
       });
+
       handleSettingFunds(relatedFunds);
     } else {
       handleSettingFunds([]);
     }
-  }, [selectedFundGroup]);
+  }, [selectedFundGroupID]);
 
   return (
     <div className='TransactionFilters '>
@@ -51,7 +50,7 @@ const TransactionFilters = ({
                 type='date'
                 id='from-date'
                 value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
+                onChange={handleDateChange}
                 className='px-3 py-2 border border-gray-300 rounded-md shadow-sm '
               />
             </div>
@@ -61,10 +60,9 @@ const TransactionFilters = ({
               </label>
               <input
                 type='date'
-                id='datePicker'
+                id='to-date'
                 value={toDate}
                 onChange={handleDateChange}
-                pattern='\d{4}-\d{2}-\d{2}'
                 className='px-3 py-2 border border-gray-300 rounded-md shadow-sm '
               />
             </div>
@@ -77,12 +75,13 @@ const TransactionFilters = ({
             </label>
             <select
               id='fund-group'
-              value={selectedFundGroup}
+              value={selectedFundGroupID}
               onChange={(e) => handleSelectedFundGroup(e)}
               className='block w-fit px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
             >
+              <option value=''>All Fund Groups</option>
               {fundGroups.map((group) => (
-                <option key={group.id} value={group.name}>
+                <option key={group.id} value={group.id}>
                   {group.name}
                 </option>
               ))}
@@ -91,33 +90,23 @@ const TransactionFilters = ({
           <div className='flex  gap-4 justify-between items-center'>
             <label
               htmlFor='select-fund'
-              className=' block w-full text-gray-700 '
+              className=' block w-[15rem] text-gray-700 '
             >
               Select Fund:
             </label>
             <select
               className='block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
-              disabled={!selectedFundGroup}
+              disabled={!selectedFundGroupID}
+              onChange={(e) => handleSelectedFundId(e)}
+              value={selectedFundID}
             >
               <option value=''>Select Fund</option>
-              {funds.map((fund) => (
-                <option key={fund.id} value={fund.id}>
+              {funds.map((fund, index) => (
+                <option key={fund.name} value={fund.id}>
                   {fund.name}
                 </option>
               ))}
             </select>
-            {/* <select
-              id='select-fund'
-              value={selectedFund}
-              onChange={(e) => setSelectedFund(e.target.value)}
-              className='block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
-            >
-              {funds.map((fund) => (
-                <option key={fund} value={fund}>
-                  {fund}
-                </option>
-              ))}
-            </select> */}
           </div>
         </div>
       </div>

@@ -3,11 +3,17 @@ import { FundContext } from "../../contexts/FundContext";
 import * as XLSX from "xlsx";
 import TransactionFilters from "./TransactionFilters";
 const TransactionsTable = () => {
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
+  console.log(fromDate, toDate);
+
   const {
     allTransactionsData,
     fetchAllTransactionsData,
     fetchFundGroupData,
-
+    selectedFundGroupID,
+    selectedFundID,
     fetchAllFundsData,
   } = useContext(FundContext);
 
@@ -20,8 +26,42 @@ const TransactionsTable = () => {
     fetchAllTransactionsData();
   }, []);
 
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  useEffect(() => {
+    let newFilteredTransactions = [...allTransactionsData];
+
+    // Check if all filters are selected
+    if (selectedFundGroupID && selectedFundID && fromDate && toDate) {
+      // Filter by Fund ID
+      newFilteredTransactions = newFilteredTransactions.filter(
+        (transaction) => transaction.Fund_id === selectedFundID
+      );
+
+      // Filter by Date Range
+      newFilteredTransactions = newFilteredTransactions.filter(
+        (transaction) => {
+          const tradeDate = new Date(
+            transaction.Trade_date.substring(0, 4),
+            transaction.Trade_date.substring(4, 6) - 1,
+            transaction.Trade_date.substring(6, 8)
+          );
+          return (
+            tradeDate >= new Date(fromDate) && tradeDate <= new Date(toDate)
+          );
+        }
+      );
+    } else {
+      // If all filters are not selected, set an empty array
+      newFilteredTransactions = [];
+    }
+
+    setFilteredTransactions(newFilteredTransactions);
+  }, [
+    allTransactionsData,
+    selectedFundID,
+    fromDate,
+    toDate,
+    selectedFundGroupID,
+  ]);
 
   const formatYYYYMMDD = (dateStr) => {
     return `${dateStr.substring(0, 4)}-${dateStr.substring(
@@ -29,20 +69,25 @@ const TransactionsTable = () => {
       6
     )}-${dateStr.substring(6, 8)}`;
   };
-  const handleDateChange = (event) => {
-    setToDate(event.target.value);
+  const handleDateChange = (e) => {
+    const { value, id } = e.target;
+    if (id === "from-date") {
+      setFromDate(value);
+    } else if (id === "to-date") {
+      setToDate(value);
+    }
   };
 
-  const filteredTransactions = allTransactionsData.filter((transaction) => {
-    const tradeDateFormatted = formatYYYYMMDD(transaction.Trade_date);
-    const settlementDateFormatted = formatYYYYMMDD(transaction.Trade_date);
+  // const filteredTransactions = allTransactionsData.filter((transaction) => {
+  //   const tradeDateFormatted = formatYYYYMMDD(transaction.Trade_date);
+  //   const settlementDateFormatted = formatYYYYMMDD(transaction.Trade_date);
 
-    // Check if fromDate and toDate are set, otherwise bypass the filter for that end
-    const afterFromDate = fromDate ? tradeDateFormatted >= fromDate : true;
-    const beforeToDate = toDate ? settlementDateFormatted <= toDate : true;
+  //   // Check if fromDate and toDate are set, otherwise bypass the filter for that end
+  //   const afterFromDate = fromDate ? tradeDateFormatted >= fromDate : true;
+  //   const beforeToDate = toDate ? settlementDateFormatted <= toDate : true;
 
-    return afterFromDate && beforeToDate;
-  });
+  //   return afterFromDate && beforeToDate;
+  // });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -83,7 +128,7 @@ const TransactionsTable = () => {
 
   const downloadExcel = () => {
     const workbook = XLSX.utils.book_new(); // Create a new workbook
-    const worksheet = XLSX.utils.json_to_sheet(currentData); // Convert
+    const worksheet = XLSX.utils.json_to_sheet(filteredTransactions); // Convert
     XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions"); //
     XLSX.writeFile(workbook, "Transactions.xlsx");
   };

@@ -23,7 +23,8 @@ export const FundProvider = ({ children }) => {
   const [fundGroups, setFundGroups] = useState([]);
   const [AllFundsData, setAllFundsData] = useState([]);
   const [funds, setFunds] = useState([]);
-  const [selectedFundGroup, setSelectedFundGroup] = useState("");
+  const [selectedFundGroupID, setSelectedFundGroupID] = useState("");
+  const [selectedFundID, setSelectedFundID] = useState("");
 
   const fetchAccountData = async () => {
     const response = await fetch("/suncrestFiles/xx_account_info.json");
@@ -39,7 +40,15 @@ export const FundProvider = ({ children }) => {
 
   // Transacitionsd Table
   const handleSelectedFundGroup = async (e) => {
-    setSelectedFundGroup(e.target.value);
+    const selectedGroupID = e.target.value;
+
+    const selectedGroup = AllFundsData.find(
+      (group) => group.Fund_group_id === selectedGroupID
+    );
+
+    if (selectedGroup) {
+      setSelectedFundGroupID(selectedGroup.Fund_group_id);
+    }
   };
 
   const fetchFundGroupData = async () => {
@@ -199,6 +208,11 @@ export const FundProvider = ({ children }) => {
     handleCheckboxState();
   };
 
+  const handleSelectedFundId = (e) => {
+    const selectedFundId = e.target.value;
+    setSelectedFundID(selectedFundId);
+  };
+
   const handleSelectedDealerAccount = (value) => {
     // Find the corresponding fund account ID from your dataset
 
@@ -317,10 +331,12 @@ export const FundProvider = ({ children }) => {
         handleSuggestions,
         fetchFundGroupData,
         fundGroups,
-        selectedFundGroup,
+        selectedFundGroupID,
         fetchAllFundsData,
         handleSettingFunds,
         handleSelectedFundGroup,
+        handleSelectedFundId,
+        selectedFundID,
         AllFundsData,
         funds,
       }}
