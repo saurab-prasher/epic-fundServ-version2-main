@@ -6,9 +6,9 @@ import AccountTransactionsTable from "../account/AccountTransactionsTable";
 const FundAccountPage = () => {
   return (
     <>
-      <div className='mx-auto w-fit '>
-        <div className='py-8'>
-          <div className='container mx-auto'>
+      <div className='mt-12 px-4 w-11/12 mx-auto'>
+        <div>
+          <div>
             <div className='flex gap-36'>
               <AccountLookup />
               <AccountDetails />

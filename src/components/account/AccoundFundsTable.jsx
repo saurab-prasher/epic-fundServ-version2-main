@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { FundContext } from "../../contexts/FundContext";
+import Pagination from "../Pagination";
 
 const AccountFundsTable = () => {
   const {
@@ -44,36 +45,13 @@ const AccountFundsTable = () => {
     });
   };
 
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [rowsPerPage, setRowsPerPage] = useState(5);
+
   // Calculate the current items to display
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const currentData = filteredData?.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Pagination logic
-  const totalPageNumbersToShow = 5;
-  const totalPageNumbers = Math.ceil(filteredData?.length / rowsPerPage);
-  const pageNumbers = Array.from({ length: totalPageNumbers }, (_, i) => i + 1);
-
-  let firstPageNumberToShow = Math.max(
-    1,
-    currentPage - Math.floor(totalPageNumbersToShow / 2)
-  );
-  let lastPageNumberToShow = firstPageNumberToShow + totalPageNumbersToShow - 1;
-
-  if (lastPageNumberToShow > pageNumbers.length) {
-    lastPageNumberToShow = pageNumbers.length;
-    let firstPageAdjusted = Math.max(
-      1,
-      lastPageNumberToShow - totalPageNumbersToShow + 1
-    );
-    firstPageNumberToShow = Math.min(firstPageNumberToShow, firstPageAdjusted);
-  }
-
-  const visiblePageNumbers = pageNumbers.slice(
-    firstPageNumberToShow - 1,
-    lastPageNumberToShow
-  );
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
   return (
     <>
       {/* Account Funds table */}
@@ -168,7 +146,7 @@ const AccountFundsTable = () => {
                 id='rows-per-page'
                 value={rowsPerPage}
                 onChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
-                className='w-16 mt-1 block w-fit border py-1 px-1 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md'
+                className='mt-1 block w-fit border py-1 px-1 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md'
               >
                 <option value='5'>5</option>
                 <option value='10'>10</option>
@@ -177,47 +155,27 @@ const AccountFundsTable = () => {
               </select>
             </div>
 
-            <div className='pagination flex space-x-1 '>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 ${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                &#171; Prev
-              </button>
+            {filteredData.length > 0 && filteredData ? (
+              <div className='justify-self-start px-6 mr-auto'>
+                <p className='text-xs font-normal text-gray-600 mr-auto'>
+                  Total:
+                  <span className='font-semibold'>
+                    {" "}
+                    {filteredData?.length}{" "}
+                  </span>
+                  accounts
+                </p>
+              </div>
+            ) : (
+              ""
+            )}
 
-              {visiblePageNumbers.map((number) => (
-                <button
-                  key={number}
-                  onClick={() => paginate(number)}
-                  className={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 ${
-                    currentPage === number
-                      ? "bg-blue-500 text-white hover:bg-blue-600"
-                      : ""
-                  }`}
-                >
-                  {number}
-                </button>
-              ))}
-
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(prev + 1, pageNumbers.length)
-                  )
-                }
-                disabled={currentPage === pageNumbers.length}
-                className={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 ${
-                  currentPage === pageNumbers.length
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-              >
-                Next &#187;
-              </button>
-            </div>
+            <Pagination
+              rowsPerPage={rowsPerPage}
+              totalItems={filteredData?.length}
+              paginate={setCurrentPage}
+              currentPage={currentPage}
+            />
           </div>
         </div>
       </div>

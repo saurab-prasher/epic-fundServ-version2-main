@@ -4,7 +4,7 @@ import { FundContext } from "../../contexts/FundContext";
 const TransactionFilters = ({
   fromDate,
   toDate,
-  setFromDate,
+
   handleDateChange,
 }) => {
   const {
@@ -37,14 +37,14 @@ const TransactionFilters = ({
 
   return (
     <div className='TransactionFilters '>
-      <h2 className='text-2xl font-semibold leading-tight'>Filters</h2>
+      <h2 className='text-2xl font-semibold leading-tight mb-8'>Filters</h2>
 
       <div className=' flex  gap-12'>
         <div className=' flex gap-16'>
           <div className='flex flex-col gap-4'>
             <div className='flex  gap-4 justify-between items-center'>
               <label htmlFor='from-date' className=' text-gray-700'>
-                From Date (YYYYMMDD):
+                From Date:
               </label>
               <input
                 type='date'
@@ -56,7 +56,7 @@ const TransactionFilters = ({
             </div>
             <div className='flex  gap-4 justify-between items-center'>
               <label htmlFor='to-date' className='mb-2 text-gray-700'>
-                To Date (YYYYMMDD):
+                To Date:
               </label>
               <input
                 type='date'

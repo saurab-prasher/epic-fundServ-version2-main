@@ -26,10 +26,30 @@ export const FundProvider = ({ children }) => {
   const [selectedFundGroupID, setSelectedFundGroupID] = useState("");
   const [selectedFundID, setSelectedFundID] = useState("");
 
+  const [navFundId, setNavFundId] = useState([]);
+
+  const [allNavData, setAllNavData] = useState([]);
+
   const fetchAccountData = async () => {
     const response = await fetch("/suncrestFiles/xx_account_info.json");
     const data = await response.json();
     setAccount(data);
+  };
+
+  const fetchNavFundData = async () => {
+    const response = await fetch("/suncrestFiles/xx_fund_nav.json");
+    const data = await response.json();
+
+    setAllNavData(data);
+
+    const uniqueNavFundId = Array.from(
+      new Set(
+        data.map((fund) =>
+          JSON.stringify({ Fund_id: fund.Fund_id, Fund_name: fund.Fund_name })
+        )
+      )
+    ).map((item) => JSON.parse(item));
+    setNavFundId(uniqueNavFundId);
   };
 
   const fetchAllFundsData = async () => {
@@ -339,6 +359,9 @@ export const FundProvider = ({ children }) => {
         selectedFundID,
         AllFundsData,
         funds,
+        fetchNavFundData,
+        navFundId,
+        allNavData,
       }}
     >
       {children}
