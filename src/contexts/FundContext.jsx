@@ -14,7 +14,6 @@ export const FundProvider = ({ children }) => {
   const [fundAccountId, setFundAccountId] = useState("");
   const [suggestions, setSuggestions] = useState(accountData);
   const [selectedFundId, setSelectedFundId] = useState({});
-  // const [accountName, setAccountName] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [allTransactionsData, setAllTransactionsData] = useState([]);
   const [accountInfoData, setAccountInfoData] = useState([]);
@@ -25,10 +24,11 @@ export const FundProvider = ({ children }) => {
   const [funds, setFunds] = useState([]);
   const [selectedFundGroupID, setSelectedFundGroupID] = useState("");
   const [selectedFundID, setSelectedFundID] = useState("");
-
   const [navFundId, setNavFundId] = useState([]);
-
   const [allNavData, setAllNavData] = useState([]);
+
+  const [selectedFundIdNav, setSelectedFundIdNav] = useState("");
+  const [selectedFundNameNav, setSelectedFundNameNav] = useState("");
 
   const fetchAccountData = async () => {
     const response = await fetch("/suncrestFiles/xx_account_info.json");
@@ -314,6 +314,48 @@ export const FundProvider = ({ children }) => {
       return newSelected;
     });
   }
+  const handleFundIdChangeNav = (event) => {
+    const newId = event.target.value;
+    setSelectedFundIdNav(newId);
+
+    if (!newId) {
+      // Clear the fund name only if the fund ID has been completely cleared.
+      setSelectedFundNameNav("");
+    }
+
+    if (newId) {
+      const fund = navFundId.find((f) => f.Fund_id === newId);
+      if (fund && fund.Fund_name) {
+        setSelectedFundNameNav(fund.Fund_name);
+      } else {
+        setSelectedFundNameNav("");
+      }
+    } else {
+      // This ensures that clearing the fund ID field also clears the fund name.
+      setSelectedFundNameNav("");
+    }
+  };
+
+  const handleFundNameChangeNav = (event) => {
+    const newName = event.target.value;
+    setSelectedFundNameNav(newName);
+
+    if (!newName) {
+      setSelectedFundNameNav("");
+    }
+
+    if (newName) {
+      const fund = navFundId.find((f) => f.Fund_name === newName);
+      if (fund && fund.Fund_id) {
+        setSelectedFundIdNav(fund.Fund_id);
+      } else {
+        setSelectedFundIdNav("");
+      }
+    } else {
+      // This ensures that clearing the fund name field also clears the fund ID.
+      setSelectedFundIdNav("");
+    }
+  };
 
   return (
     <FundContext.Provider
@@ -362,6 +404,10 @@ export const FundProvider = ({ children }) => {
         fetchNavFundData,
         navFundId,
         allNavData,
+        handleFundIdChangeNav,
+        handleFundNameChangeNav,
+        selectedFundNameNav,
+        selectedFundIdNav,
       }}
     >
       {children}

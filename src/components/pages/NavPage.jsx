@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Pagination from "../Pagination";
 import { FundContext } from "../../contexts/FundContext";
 
@@ -7,51 +7,42 @@ const NavPage = () => {
     fetchNavFundData,
     navFundId,
     allNavData: navs,
+    handleFundNameChangeNav,
+    handleFundIdChangeNav,
+    selectedFundNameNav,
+    selectedFundIdNav,
   } = useContext(FundContext);
-
-  console.log(navs);
-
-  // States to hold the selected fund ID and fund name
-  const [selectedFundId, setSelectedFundId] = useState("");
-  const [selectedFundName, setSelectedFundName] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
     fetchNavFundData();
-  }, []);
+    // Make sure this function doesn't depend on anything that changes often unless necessary
+  }, [fetchNavFundData]); // Add fetchNavFundData here if it’s stable (doesn’t change on every render), otherwise, keep it empty.
+
+  useEffect(() => {
+    filterData(); // Ensure this function doesn't set selectedFundIdNav or selectedFundNameNav unless necessary
+  }, [selectedFundIdNav, selectedFundNameNav]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const filteredData = navs.filter(
-    (nav) =>
-      nav.Fund_id === selectedFundId || nav.Fund_name === selectedFundName
-  );
+
+  const filterData = () => {
+    // clear the table
+    setFilteredData([]);
+    if (selectedFundIdNav && selectedFundNameNav) {
+      const filteredData = navs.filter(
+        (nav) =>
+          nav.Fund_id === selectedFundIdNav &&
+          nav.Fund_name === selectedFundNameNav
+      );
+      setFilteredData(filteredData);
+    }
+  };
 
   // Calculate the current items to display
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem); // Changed from navsData to use navFundId from context
-
-  // Event handler for when the fund ID changes
-  const handleFundIdChange = (event) => {
-    const newId = event.target.value;
-    setSelectedFundId(newId);
-
-    const fund = navFundId.find((f) => f.Fund_id === newId);
-    if (fund) {
-      setSelectedFundName(fund.Fund_name); // Assuming your fund objects have Fund_name property
-    }
-  };
-
-  // Event handler for when the fund name changes
-  const handleFundNameChange = (event) => {
-    const newName = event.target.value;
-    setSelectedFundName(newName);
-
-    const fund = navFundId.find((f) => f.Fund_name === newName);
-    if (fund) {
-      setSelectedFundId(fund.Fund_id); // Assuming your fund objects have Fund_id property
-    }
-  };
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className='my-12 px-4 w-11/12 mx-auto'>
@@ -68,8 +59,8 @@ const NavPage = () => {
           <input
             list='fund-ids'
             id='fund-id'
-            value={selectedFundId}
-            onChange={handleFundIdChange}
+            value={selectedFundIdNav}
+            onChange={handleFundIdChangeNav}
             placeholder='Type or select a fund ID'
             className='block w-[32rem] px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
           />
@@ -91,8 +82,8 @@ const NavPage = () => {
           <input
             list='fund-names'
             id='fund-name'
-            value={selectedFundName}
-            onChange={handleFundNameChange}
+            value={selectedFundNameNav}
+            onChange={handleFundNameChangeNav}
             placeholder='Type or select a fund name'
             className='block  w-[32rem] px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm '
           />
@@ -185,7 +176,10 @@ const NavPage = () => {
               <div className='justify-self-start px-6 mr-auto'>
                 <p className='text-xs font-normal text-gray-600 mr-auto'>
                   Total:
-                  <span className='font-semibold'> {navs?.length} </span>
+                  <span className='font-semibold'>
+                    {" "}
+                    {filteredData?.length}{" "}
+                  </span>
                   accounts
                 </p>
               </div>
